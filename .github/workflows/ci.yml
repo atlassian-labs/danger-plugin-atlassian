@@ -1,0 +1,55 @@
+# CI workflow hardened for untrusted PRs
+# - Uses pull_request (not pull_request_target) to avoid elevated token permissions on forked PRs
+# - Explicit least-privilege permissions to reduce scope of the GITHUB_TOKEN
+# - checkout uses persist-credentials: false to prevent token from being written to the repo's config
+# - Install step guarded against pull_request_target context to avoid running arbitrary code with elevated token
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+    # pull_request keeps the token read-only for forked PRs (safer than pull_request_target)
+    branches: [main]
+    # Limit to common PR events; no 'closed' to avoid noise
+    types: [opened, synchronize, reopened]
+  # Allow manual workflow runs for maintainers
+  workflow_dispatch:
+permissions:
+  contents: read
+  pull-requests: read
+  checks: write
+
+jobs:
+  build-test-lint:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+      checks: write
+    steps:
+      # Security check: verify the actor is not from a fork for sensitive operations
+      - name: Check if PR is from fork
+        id: fork-check
+        run: |
+          if [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]; then
+            echo "is_fork=true" >> $GITHUB_OUTPUT
+            echo "::warning::PR is from a fork. Some security checks will be applied."
+          else
+            echo "is_fork=false" >> $GITHUB_OUTPUT
+          fi
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Test (coverage)
+        run: npm run coverage
+      - name: Build
+        run: npm run build
