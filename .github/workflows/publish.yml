@@ -25,13 +25,24 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
 
+      - name: Get Artifact Publish Token
+        id: publish-token
+        uses: atlassian-labs/artifact-publish-token@v1.0.1
+        with:
+          output-modes: npm
+
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
           registry-url: https://packages.atlassian.com/api/npm/npm-public/
+          cache: npm
+        env:
+          NODE_AUTH_TOKEN: ${{ steps.publish-token.outputs.npm-token }}
 
       - name: Install dependencies (CI)
+        env:
+          NODE_AUTH_TOKEN: ${{ steps.publish-token.outputs.npm-token }}
         run: npm ci
 
       - name: Build
@@ -41,12 +52,6 @@ jobs:
         run: |
           echo "Setting package version to ${NEW_VERSION}"
           npm version --no-git-tag-version "${NEW_VERSION}"
-
-      - name: Get Artifact Publish Token
-        id: publish-token
-        uses: atlassian-labs/artifact-publish-token@v1.0.1
-        with:
-          output-modes: npm
 
       - name: Verify publishConfig
         run: |
