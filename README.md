@@ -13,7 +13,7 @@ Key features:
 Install into your repo alongside Danger:
 
 ```sh
-npm install --save-dev danger danger-plugin-atlassian
+npm install --save-dev danger danger-atlassian
 # npm only is supported for this project
 ```
 
@@ -29,7 +29,7 @@ This plugin exposes a small set of helpers designed to be used from your Dangerf
 ```ts
 // dangerfile.ts
 import { schedule } from 'danger'
-import { addTasks, addReviewers } from 'danger-plugin-atlassian'
+import { addTasks, addReviewers } from 'danger-atlassian'
 
 // Add reviewers by AAID (Atlassian Account ID) - use https://id.atlassian.com/gateway/api/me to retrieve yours
 schedule(addReviewers(['117058:9c6d0119-0000-1111-2222-0000d7399fff']))
