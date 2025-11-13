@@ -1,5 +1,5 @@
 {
-  "name": "danger-atlassian",
+  "name": "@atlassian/danger-atlassian",
   "version": "1.0.0",
   "description": "DangerJS plugin with Atlassian/Bitbucket Cloud helpers and declarative rules.",
   "license": "Apache-2.0",
