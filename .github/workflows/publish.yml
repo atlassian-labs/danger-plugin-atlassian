@@ -25,24 +25,13 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
 
-      - name: Get Artifact Publish Token
-        id: publish-token
-        uses: atlassian-labs/artifact-publish-token@v1.0.1
-        with:
-          output-modes: npm
-
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          registry-url: https://packages.atlassian.com/api/npm/npm-public/
           cache: npm
-        env:
-          NODE_AUTH_TOKEN: ${{ steps.publish-token.outputs.npm-token }}
 
       - name: Install dependencies (CI)
-        env:
-          NODE_AUTH_TOKEN: ${{ steps.publish-token.outputs.npm-token }}
         run: npm ci
 
       - name: Build
@@ -57,9 +46,11 @@ jobs:
         run: |
           node -e "const p=require('./package.json'); if(!p.publishConfig||!p.publishConfig.registry||!p.publishConfig.registry.includes('packages.atlassian.com')){process.exit(1)}; console.log('publishConfig OK ->', p.publishConfig.registry)"
 
-      - name: Publish
-        env:
-          NODE_AUTH_TOKEN: ${{ steps.publish-token.outputs.npm-token }}
-        run: |
-          npm whoami || true
-          npm publish --provenance=false
+      - name: Get Artifact Publish Token
+        id: publish-token
+        uses: atlassian-labs/artifact-publish-token@v1.0.1
+        with:
+          output-modes: npm
+
+      - name: Publish to npm
+        run: npm publish --userconfig=./.npmrc-public --@danger-atlassian:registry="https://packages.atlassian.com/api/npm/npm-public/"
