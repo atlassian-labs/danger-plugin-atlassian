@@ -53,4 +53,4 @@ jobs:
           output-modes: npm
 
       - name: Publish to npm
-        run: npm publish --userconfig=./.npmrc-public --@danger-atlassian:registry="https://packages.atlassian.com/api/npm/npm-public/"
+        run: npm publish --userconfig=./.npmrc-public --@atlassian/danger-atlassian:registry="https://packages.atlassian.com/api/npm/npm-public/"
