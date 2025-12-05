@@ -12,6 +12,8 @@ on:
     branches: [main, master]
     # Limit to common PR events; no 'closed' to avoid noise
     types: [opened, synchronize, reopened]
+  # Allow manual workflow runs for maintainers
+  workflow_dispatch:
 permissions:
   contents: read
   pull-requests: read
@@ -25,6 +27,16 @@ jobs:
       pull-requests: read
       checks: write
     steps:
+      # Security check: verify the actor is not from a fork for sensitive operations
+      - name: Check if PR is from fork
+        id: fork-check
+        run: |
+          if [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]; then
+            echo "is_fork=true" >> $GITHUB_OUTPUT
+            echo "::warning::PR is from a fork. Some security checks will be applied."
+          else
+            echo "is_fork=false" >> $GITHUB_OUTPUT
+          fi
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
