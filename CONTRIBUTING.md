@@ -1,6 +1,6 @@
-# Contributing to danger-atlassian
+# Contributing to danger-plugin-atlassian
 
-Thank you for considering a contribution to danger-atlassian! Pull requests, issues and comments are welcome. For pull requests, please:
+Thank you for considering a contribution to danger-plugin-atlassian! Pull requests, issues and comments are welcome. For pull requests, please:
 
 - Add tests for new features and bug fixes
 - Follow the existing style
