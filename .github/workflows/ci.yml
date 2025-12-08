@@ -6,10 +6,10 @@
 name: CI
 on:
   push:
-    branches: [main, master]
+    branches: [main]
   pull_request:
     # pull_request keeps the token read-only for forked PRs (safer than pull_request_target)
-    branches: [main, master]
+    branches: [main]
     # Limit to common PR events; no 'closed' to avoid noise
     types: [opened, synchronize, reopened]
   # Allow manual workflow runs for maintainers
