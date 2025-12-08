@@ -14,7 +14,12 @@ Install into your repo alongside Danger:
 
 ```sh
 npm install --save-dev danger @atlassian/danger-plugin-atlassian
-# npm only is supported for this project
+```
+
+Or with Yarn:
+
+```sh
+yarn add --dev danger @atlassian/danger-plugin-atlassian
 ```
 
 ## Documentation
