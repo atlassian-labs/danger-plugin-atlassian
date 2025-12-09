@@ -71,6 +71,17 @@ describe("addTasks", () => {
     );
   });
 
+  it("warns when bitbucket_cloud missing", async () => {
+    const warn = vi.fn();
+    g.danger = { warn };
+
+    await addTasks(["x"]);
+
+    expect(warn).toHaveBeenCalledWith(
+      "addTasks requires bitbucket_cloud.api. Skipping.",
+    );
+  });
+
   it("throws on GET failure", async () => {
     const { api } = setupDangerMock();
     api.get.mockResolvedValueOnce({
@@ -119,6 +130,17 @@ describe("addReviewers", () => {
           { account_id: "C" },
         ],
       },
+    );
+  });
+
+  it("warns when bitbucket_cloud missing", async () => {
+    const warn = vi.fn();
+    g.danger = { warn };
+
+    await addReviewers(["x"]);
+
+    expect(warn).toHaveBeenCalledWith(
+      "addReviewers requires bitbucket_cloud.api. Skipping.",
     );
   });
 

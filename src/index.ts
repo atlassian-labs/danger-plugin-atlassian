@@ -11,17 +11,19 @@ declare const danger: DangerDSLType;
  * Usage example: schedule(addTasks(["my task 1","my task 2"]))
  */
 export async function addTasks(rawTaskContentArray: string[]): Promise<void> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const api = (danger as any).bitbucket_cloud.api;
-   
-  const prUrl: string =
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (danger as any).bitbucket_cloud.pr.links.self.href + "/tasks";
+  const bitbucketCloud = getBitbucketCloudOrWarn("addTasks");
+  if (!bitbucketCloud) {
+    return;
+  }
+  const api = bitbucketCloud.api;
+  const prUrl: string = bitbucketCloud.pr.links.self.href + "/tasks";
 
   // Fetch existing tasks (first page up to 100)
   let res = await api.get(prUrl + "?pagelen=100", {}, {});
   throwErrorIfNotOK(res);
-  const json = await res.json();
+  const json = (await res.json()) as {
+    values?: { content?: { raw?: string } }[];
+  };
   const rawContentTasks: string[] = (json.values ?? []).map(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (item: any) => item.content.raw as string,
@@ -43,17 +45,19 @@ export async function addTasks(rawTaskContentArray: string[]): Promise<void> {
  * @param reviewerAAIDs array of AAIDs of the reviewers to be added
  */
 export async function addReviewers(reviewerAAIDs: string[]): Promise<void> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const api = (danger as any).bitbucket_cloud.api;
-   
-   
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const prUrl: string = (danger as any).bitbucket_cloud.pr.links.self.href;
+  const bitbucketCloud = getBitbucketCloudOrWarn("addReviewers");
+  if (!bitbucketCloud) {
+    return;
+  }
+  const api = bitbucketCloud.api;
+  const prUrl: string = bitbucketCloud.pr.links.self.href;
 
   // Fetch current PR state (including reviewers)
   let res = await api.put(prUrl, {}, {});
   throwErrorIfNotOK(res);
-  const current = await res.json();
+  const current = (await res.json()) as {
+    reviewers?: { account_id?: string }[];
+  };
   const originalReviewersAAIDs: string[] = (current.reviewers ?? []).map(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (item: any) => item.account_id as string,
@@ -71,6 +75,23 @@ export async function addReviewers(reviewerAAIDs: string[]): Promise<void> {
     { reviewers: merged.map((item) => ({ account_id: item })) },
   );
   throwErrorIfNotOK(res);
+}
+
+function getBitbucketCloudOrWarn(callerName: string): any {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const dangerObj: any = (globalThis as any).danger;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const bitbucketCloud: any = dangerObj?.bitbucket_cloud;
+  if (!bitbucketCloud?.api) {
+    const warnMessage = `${callerName} requires bitbucket_cloud.api. Skipping.`;
+    if (typeof dangerObj?.warn === "function") {
+      dangerObj.warn(warnMessage);
+    } else {
+      console.warn(warnMessage);
+    }
+    return null;
+  }
+  return bitbucketCloud;
 }
 
 /**
