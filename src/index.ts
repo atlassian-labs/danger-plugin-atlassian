@@ -1,7 +1,3 @@
-import type { DangerDSLType } from "danger/distribution/dsl/DangerDSL";
-
-declare const danger: DangerDSLType;
-
 /**
  * Add tasks to the PR, not adding the ones already present.
  * The implementation fetches all tasks and compares them with the ones to be added.
@@ -77,11 +73,10 @@ export async function addReviewers(reviewerAAIDs: string[]): Promise<void> {
   throwErrorIfNotOK(res);
 }
 
-function getBitbucketCloudOrWarn(callerName: string): any {
+function getBitbucketCloudOrWarn(callerName: string): unknown {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const dangerObj: any = (globalThis as any).danger;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const bitbucketCloud: any = dangerObj?.bitbucket_cloud;
+  const bitbucketCloud = dangerObj?.bitbucket_cloud;
   if (!bitbucketCloud?.api) {
     const warnMessage = `${callerName} requires bitbucket_cloud.api. Skipping.`;
     if (typeof dangerObj?.warn === "function") {
@@ -100,8 +95,10 @@ function getBitbucketCloudOrWarn(callerName: string): any {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function throwErrorIfNotOK(res: any): void {
   if (!res || !res.ok) {
-    const status = res?.status ?? "";
-    const statusText = res?.statusText ?? "";
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const status = (res as any)?.status ?? "";
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const statusText = (res as any)?.statusText ?? "";
     throw new Error(`${status} ${statusText}`.trim());
   }
 }
